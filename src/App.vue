@@ -1,5 +1,13 @@
 <template>
   <div id="app">
+    <nav>
+      <div class="navigation__logo">
+        Twotter
+      </div>
+      <div class="navigation__user">
+        {{ user.username}}
+      </div>
+    </nav>
     <UserProfile />
   </div>
 </template>
@@ -12,11 +20,18 @@ export default {
   components: {
     UserProfile
   },
+  data() {
+    return {
+      user: {
+        username: 'bandaids20'
+      }
+    }
+  }
   
 }
 </script>
 
-<style>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -24,6 +39,23 @@ export default {
   color: #2c3e50;
   min-height: 100vh;
   background-color: #F3F5FA;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 5%;
+  background: turquoise;
+  color: white;
+  
+  .navigation__logo {
+    font-weight: bold;
+    font-size: 2.5rem;
+  }
+  .navigation__user {
+    font-weight: bold;
+  }
 }
 
 </style>

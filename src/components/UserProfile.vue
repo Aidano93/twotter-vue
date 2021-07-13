@@ -1,57 +1,38 @@
 <template>
   <div class="user-profile">
-    <div class="user-profile__user-panel">
-      <h1 class="user-profile__username">@{{user.username}}</h1>
-      <div class="user-profile__admin-badge" v-if="user.isAdmin" >Admin</div>
-      <div class="user-profile__admin-badge" v-else>Not Admin</div>
+    <div class="user-profile__sidebar">
+      <div class="user-profile__user-panel">
+      <h1 class="user-profile__username">@{{state.user.username}}</h1>
+      <div class="user-profile__admin-badge" v-if="state.user.isAdmin" >Admin</div>
       <div class="user-profile__follower-count">
-        <strong>Followers:</strong> {{followers}}
+        <strong>Followers:</strong> {{state.followers}}
       </div>
-      <form class="user-profile__create-twoot" @submit.prevent="createNewTwoot">
-        <label for="newTwoot"><strong>New Twoot</strong></label>
-        <textarea name="newTwoot" id="newTwoot" rows="4" v-model="newTwootContent"></textarea>
-        <div class="user-profile__create-twoot-type">
-          <label for="newTwootType"><strong>Type</strong></label>
-          <select id="newTwootType" v-model="selectedTwootType">
-            <option :value="option.value" v-for="(option, index) in twootTypes" :key="index">
-              {{option.name}}
-            </option>
-          </select>
-        </div>
-        <button>
-          Post!
-        </button>
-      </form>
+      <CreateTwootPanel @add-twoot="addTwoot" />
     </div>
+  </div>
     <div class="user-profile__twoots-wrapper">
       <TwootItem 
-        v-for="twoot in user.twoots" 
+        v-for="twoot in state.user.twoots" 
         :key="twoot.id" 
-        :username="user.username" 
+        :username="state.user.username" 
         :twoot="twoot" 
-        @favourite="toggleFavourite" 
       /> 
     </div>
   </div>
 </template>
 <script>
+import {reactive} from 'vue';
 import TwootItem from "./TwootItem"
+import CreateTwootPanel from "./CreateTwootPanel"
 
 export default {
-  
   name: 'UserProfile',
   components: {
     TwootItem,
+    CreateTwootPanel,
   },
-  data() {
-    return {
-      twootDate: '',
-      newTwootContent: '',
-      selectedTwootType: 'instant',
-      twootTypes: [
-        {value: 'draft', name: 'Draft'},
-        {value: 'instant', name: 'Instant Twoot'}
-      ],
+  setup() {
+    const state = reactive ({
       followers: 0,
       user: {
         id: 1,
@@ -66,47 +47,15 @@ export default {
           {id: 3, content: 'APES to the moon', date: '8/8/2021'}
         ]
       }
+    })
+    function addTwoot (twoot) {
+      state.user.twoots.unshift({id: state.user.twoots.length + 1, content: twoot, date: state.twootDate});
     }
-  },
-  watch: {
-    followers(newFollowerCount, oldFollowerCount) {
-      if (oldFollowerCount < newFollowerCount) {
-        console.log(`${this.user.username} has gained a follower!`)
-      }
-    }
-  },
-  
-  computed: {
-    fullName() {
-      return `${this.user.firstName} ${this.user.lastName}`
-    }
-  },
-  methods: {
-    followUser() {
-      this.followers++
-    },
-    toggleFavourite(id) {
-      console.log(`Favourited Twoot ${id}`)
-    },
-    createNewTwoot() {
-      if (this.newTwootContent && this.selectedTwootType !== 'draft') {
-        this.user.twoots.unshift({
-          id: this.user.twoots.length + 1,
-          content: this.newTwootContent,
-          date: this.twootDate,
-        });
-        this.newTwootContent = '';
-      }
-    },
-  },
-  mounted() {
-    this.followUser();
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const yyyy = today.getFullYear();
 
-    this.twootDate = `${mm}/${dd}/${yyyy}`;
+    return {
+      state,
+      addTwoot
+    }
   },
 }
 </script>
@@ -115,7 +64,6 @@ export default {
 .user-profile {
   display: grid;
   grid-template-columns: 1fr 3fr;
-  width: 100%;
   padding: 50px 5%;
 
   .user-profile__user-panel {
@@ -142,6 +90,17 @@ export default {
       padding-top: 20px;
       display: flex;
       flex-direction: column;
+
+      &.--exceeded {
+        color: red;
+        border-color: red;
+
+        button {
+          background-color: red;
+          border: none;
+          color: white;
+        }
+      }
     }
   }
   .user-profile__twoots-wrapper {
@@ -149,8 +108,4 @@ export default {
       grid-gap: .8rem;
     }
 }
-
-
-
-
 </style>
