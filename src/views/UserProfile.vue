@@ -21,9 +21,12 @@
   </div>
 </template>
 <script>
-import {reactive} from 'vue';
-import TwootItem from "./TwootItem"
-import CreateTwootPanel from "./CreateTwootPanel"
+import {reactive, computed} from 'vue';
+import { useRoute } from 'vue-router';
+import { users } from '../assets/users'
+import TwootItem from "../components/TwootItem"
+import CreateTwootPanel from "../components/CreateTwootPanel"
+
 
 export default {
   name: 'UserProfile',
@@ -32,21 +35,12 @@ export default {
     CreateTwootPanel,
   },
   setup() {
+    const route = useRoute();
+    const userId = computed(() => route.params.userId)
+
     const state = reactive ({
       followers: 0,
-      user: {
-        id: 1,
-        username: 'bandaids20',
-        firstName: 'Aidan',
-        lastName: "O'Reilly",
-        email: 'ajoreilly93@gmail.com',
-        isAdmin: true,
-        twoots: [
-          {id: 1, content: 'Twotter is cool.', date: '12/29/2021'},
-          {id: 2, content: 'Yadda Yadda Yadda', date: '11/14/2021'},
-          {id: 3, content: 'APES to the moon', date: '8/8/2021'}
-        ]
-      }
+      user: users[userId.value - 1] || users[0]
     })
     function addTwoot (twoot) {
       state.user.twoots.unshift({id: state.user.twoots.length + 1, content: twoot, date: state.twootDate});
@@ -54,7 +48,8 @@ export default {
 
     return {
       state,
-      addTwoot
+      addTwoot,
+      userId
     }
   },
 }
